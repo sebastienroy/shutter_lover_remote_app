@@ -6,8 +6,8 @@ The remote application of Shutter Lover tool
 This application is written in Python language and so can be executed on any platform that support Python language
 1. Install Python packages.  
    See https://www.python.org/downloads/
-2. Install PySerial package
-   Into the shell prompt, on an internet connected computer, execute the following line :
+2. Install PySerial package  
+   Into the shell prompt, on an internet connected computer, execute the following line :  
    ```
         pip install pyserial
         
