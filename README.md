@@ -24,9 +24,13 @@ Here is the installation instructions for Windows platform. Steps are similar on
 
 ## Usage
 
-- Connect the Shutter Lover tool on your computer through the provided USB cable
+- Connect the Shutter Lover tool on your computer using the provided USB cable
 - Switch on the tool
 - Open the Shutter Lover Remote Application
 - The application should automatically discover the communication port used by the tool and establish the communication.
-- If not connected, use the combo box to choose the right communcation port
+- If not connected, use the combo box to choose the right communication port
+- Choose de shutter curtain translation direction, using the dedicated combo box. This choice has an impact on the extrapolated course timing (see above) 
+- Perform your shutter measurements. Each time a measurement is made, a new line is added in the Remote Application, containing the full details of the measurement data.
+- In order to save your data, click on "Copy to Clipboard" button, then paste the data (CTRL+V) on any external application such as spreadsheet application or text editor.
+- To clean the data, click on the "Clear All" button.
 
