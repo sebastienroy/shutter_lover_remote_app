@@ -34,3 +34,18 @@ Here is the installation instructions for Windows platform. Steps are similar on
 - In order to save your data, click on "Copy to Clipboard" button, then paste the data (CTRL+V) on any external application such as spreadsheet application or text editor.
 - To clean the data, click on the "Clear All" button.
 
+## Data Description
+
+| Column Name | Description |
+| :--: |:-- |
+| Id | The row number. Reset to 0 when clearing the table. |
+| Speed (1/s) | The shutter opening speed measured on the central sensor. This is the inverse of the open time. Unit : 1/s |
+| Time (ms) | The shutter open time measured on the central sensor. Unit : ms |
+| Open (ms) | The course time of the first curtain (opening curtain) of the shutter, measured between the sensors located on the corners of the frame. Unit : ms |
+| Close (ms) | The course time of the second curtain (closing curtain) of the shutter, measured between the sensors located on the corners of the frame. Unit : ms |
+| Open ext | The sensors of the Shuter Lover are located on the corners of a 20mm x 32mm rectangle. This value is the extrapolation of the first curtain course time on the whole 24x36 film frame. The extrapolation calculation depends on the selected translation direction. Unit: ms |
+| Close ext | Extrapolation of the second curtain course time. Unit: ms |
+
+
+
+
