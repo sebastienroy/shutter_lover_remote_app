@@ -1,5 +1,5 @@
 """ 
-    This tool is intended to be interfaced with measurement tools such as the Baby Shutter Tester.
+    This tool is intended to be interfaced with the Shutter Lover measurement tool.
     The value of such an application is to help the user to enter series of measurement values 
     into a spreadsheet application. 
     So that, the user will be easily able to make statistics, mean value, mean deviation and so on,
@@ -125,17 +125,17 @@ class DataDef:
         else:
             return str(value)
 
-def microSpeed(val1, val2):
+def microSpeed(val1, val2, offset1=0, offset2=0):
     '''
         Computes speed in 1/s from microseconds 
         a data < 0 mean no value
     '''
-    if((val1 == val2) or (val1 < 0) or (val2 < 0)):
+    if(((val1+offset1) == (val2+offset2)) or (val1 < 0) or (val2 < 0)):
         return "-"
     else:
-        return abs(1000000.0/(val1-val2))
+        return abs(1000000.0/((val1+offset1)-(val2+offset2)))
 
-def microTime(val1, val2):
+def microTime(val1, val2, offset1=0, offset2=0):
     '''
         Computes the time difference in ms from microseconds
         a data < 0 mean no value
@@ -143,7 +143,7 @@ def microTime(val1, val2):
     if((val1 < 0) or (val2 < 0)):
         return "-"
     else:
-        return abs((val1-val2)/1000.0)
+        return abs(((val1+offset1)-(val2+offset2))/1000.0)
 
 def extrapolate(val):
     '''
@@ -181,18 +181,28 @@ class RemoteApp:
             DataDef('id', 'Id', 20, '{}', lambda data: data['id']),
             DataDef('speed_c', 'Speed (1/s)', 60, '{:0.1f}', lambda data: microSpeed(data['centerClose'], data['centerOpen'])),
             DataDef('time_c', 'Time (ms)', 60, '{:0.3f}', lambda data: microTime(data['centerClose'], data['centerOpen'])),
-            DataDef('course_1', 'Open (ms)', 60, '{:0.2f}', lambda data: microTime(data['topRightOpen'], data['bottomLeftOpen'])),
-            DataDef('course_2', 'Close (ms)', 60, '{:0.2f}', lambda data: microTime(data['topRightClose'], data['bottomLeftClose'])),
+            DataDef('course_1', 'Open (ms)', 60, '{:0.2f}', lambda data: microTime(data['topRightOpen'], data['bottomLeftOpen'], 
+                                                                                   data['topRightOpenOffset'], data['bottomLeftOpenOffset'])),
+            DataDef('course_2', 'Close (ms)', 60, '{:0.2f}', lambda data: microTime(data['topRightClose'], data['bottomLeftClose'],
+                                                                                    data['topRightCloseOffset'], data['bottomLeftCloseOffset'])),
             DataDef('course_1_ext', 'Open ext', 60, '{:0.2f}', lambda data: extrapolate(data['course_1'])),
             DataDef('course_2_ext', 'Close ext', 60, '{:0.2f}', lambda data: extrapolate(data['course_2'])),
-            DataDef('speed_bl', 'Speed Bot. L.', 70, '{:0.1f}', lambda data: microSpeed(data['bottomLeftClose'], data['bottomLeftOpen'])),
-            DataDef('time_bl', 'Time Bot. L.', 70, '{:0.3f}', lambda data: microTime(data['bottomLeftClose'], data['bottomLeftOpen'])),
-            DataDef('speed_tr', 'Speed Top R.', 70, '{:0.1f}', lambda data: microSpeed(data['topRightClose'], data['topRightOpen'])),
-            DataDef('time_tr', 'Time Top R.', 70, '{:0.3f}', lambda data: microTime(data['topRightClose'], data['topRightOpen'])),
-            DataDef('course_1_12', 'Open 1/2', 60, '{:0.2f}', lambda data: microTime(data['centerOpen'], data['bottomLeftOpen'])),
-            DataDef('course_1_22', 'Open 2/2', 60, '{:0.2f}', lambda data: microTime(data['centerOpen'], data['topRightOpen'])),
-            DataDef('course_2_12', 'Close 1/2', 60, '{:0.2f}', lambda data: microTime(data['centerClose'], data['bottomLeftClose'])),
-            DataDef('course_2_22', 'Close 2/2', 60, '{:0.2f}', lambda data: microTime(data['centerClose'], data['topRightClose']))
+            DataDef('speed_bl', 'Speed Bot. L.', 70, '{:0.1f}', lambda data: microSpeed(data['bottomLeftClose'], data['bottomLeftOpen'],
+                                                                                        data['bottomLeftCloseOffset'], data['bottomLeftOpenOffset'])),
+            DataDef('time_bl', 'Time Bot. L.', 70, '{:0.3f}', lambda data: microTime(data['bottomLeftClose'], data['bottomLeftOpen'],
+                                                                                     data['bottomLeftClose'], data['bottomLeftOpen'])),
+            DataDef('speed_tr', 'Speed Top R.', 70, '{:0.1f}', lambda data: microSpeed(data['topRightClose'], data['topRightOpen'],
+                                                                                       data['topRightCloseOffset'], data['topRightOpen'])),
+            DataDef('time_tr', 'Time Top R.', 70, '{:0.3f}', lambda data: microTime(data['topRightClose'], data['topRightOpen'],
+                                                                                    data['topRightCloseOffset'], data['topRightOpenOffset'])),
+            DataDef('course_1_12', 'Open 1/2', 60, '{:0.2f}', lambda data: microTime(data['centerOpen'], data['bottomLeftOpen'],
+                                                                                     0, data['bottomLeftOpenOffset'])),
+            DataDef('course_1_22', 'Open 2/2', 60, '{:0.2f}', lambda data: microTime(data['centerOpen'], data['topRightOpen'],
+                                                                                     9, data['topRightOpenOffset'])),
+            DataDef('course_2_12', 'Close 1/2', 60, '{:0.2f}', lambda data: microTime(data['centerClose'], data['bottomLeftClose'],
+                                                                                      0, data['bottomLeftCloseOffset'])),
+            DataDef('course_2_22', 'Close 2/2', 60, '{:0.2f}', lambda data: microTime(data['centerClose'], data['topRightClose'],
+                                                                                      0, data['topRightCloseOffset']))
             ]
 
     def openSerialPort(self, name):
@@ -223,7 +233,6 @@ class RemoteApp:
             portNames.append("--")
         return portNames
 
-
     def handleMultiSensorMeasure(self, data):
         # for each the dataDef definition, compute its value according to the json data dictionnary
         # and add the resulting value to the dictionnary with the defined key
@@ -236,7 +245,6 @@ class RemoteApp:
         # iterate on all dataDef definitions, get the value that is stored with the defined id and get it as string
         rowValues = [(dataDef.strValue(data[dataDef.id])) for dataDef in self.dataDefs]
         item = tree.insert(parent='', index='end', iid=data['id'],text='', values=rowValues)
-
 
     def dataEvent(self, event):
         """ Dispatches the events received from the listener """
