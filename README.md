@@ -18,7 +18,10 @@ Here is the installation instructions for Windows platform. Steps are similar on
         pip install pyserial
         
    ```
-3. Download the file shutter_lover_remote_app.py  
+3. Download the file shutter_lover_remote_app.py :  
+   On the following page:  
+   https://github.com/sebastienroy/shutter_lover_remote_app/blob/main/shutter_lover_remote_app.py  
+   Click on "Download raw file" button to download the application file 
 
 5. Right-click on the downloaded file and select "Open With", then select Python.  
    You can choose to always use Python to open files having ".py" extension, so that you can execute the application through a double-click on the file.
