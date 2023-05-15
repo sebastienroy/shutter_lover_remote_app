@@ -56,4 +56,10 @@ Here is the installation instructions for Windows platform. Steps are similar on
 | Open 1/2 | The course time of the first curtain between the bottom left sensor and the central sensor. Unit: ms|
 | Open 2/2 | The course time of the first curtain between the central sensor and the top right sensor. Unit: ms| 
 | Close 1/2 | The course time of the second curtain between the bottom left sensor and the central sensor. Unit: ms|
-| Close 2/2 | The course time of the second curtain between the central sensor and the top right sensor. Unit: ms| 
+| Close 2/2 | The course time of the second curtain between the central sensor and the top right sensor. Unit: ms|  
+
+## Further developments
+
+If you want to make further developments or modifications on this tool, or even rewrite your own, you'll find [here](interface_specification.md) the interface specification of the tool.
+
+
