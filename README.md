@@ -48,18 +48,18 @@ Here is the installation instructions for Windows platform. Steps are similar on
 | Id | The row number. Reset to 0 when clearing the table. |
 | Speed (1/s) | The shutter opening speed measured on the central sensor. This is the inverse of the open time. Unit : 1/s |
 | Time (ms) | The shutter open time measured on the central sensor. Unit : ms |
-| Open (ms) | The course time of the first curtain (opening curtain) of the shutter, measured between the sensors located on the corners of the frame. Unit : ms |
-| Close (ms) | The course time of the second curtain (closing curtain) of the shutter, measured between the sensors located on the corners of the frame. Unit : ms |
-| Open ext | The sensors of the Shutter Lover are located on the corners of a 20mm x 32mm rectangle. This value is the extrapolation of the first curtain course time on the whole 24x36 film frame. The extrapolation calculation depends on the selected translation direction. Unit: ms |
-| Close ext | Extrapolation of the second curtain course time. Unit: ms |
+| Open (ms) | The travel time of the first curtain (opening curtain) of the shutter, measured between the sensors located on the corners of the frame. Unit : ms |
+| Close (ms) | The travel time of the second curtain (closing curtain) of the shutter, measured between the sensors located on the corners of the frame. Unit : ms |
+| Open ext | The sensors of the Shutter Lover are located on the corners of a 20mm x 32mm rectangle. This value is the extrapolation of the first curtain travel time on the whole 24x36 film frame. The extrapolation calculation depends on the selected translation direction. Unit: ms |
+| Close ext | Extrapolation of the second curtain travel time. Unit: ms |
 | Speed Bot. L | Shutter speed measured on the sensor located at the bottom left corner of the frame. Inverse of the open time on this sensor. Unit: 1/s |
 | Time Bot. L. | The shutter open time measured on the bottom left sensor. Unit: ms |
 | Speed Top R.| Shutter speed measured on the sensor located at the top right corner of the frame. Inverse of the open time on this sensor. Unit: 1/s |
 | Time Top R. | The shutter open time measured on the top right sensor. Unit: ms|
-| Open 1/2 | The course time of the first curtain between the bottom left sensor and the central sensor. Unit: ms|
-| Open 2/2 | The course time of the first curtain between the central sensor and the top right sensor. Unit: ms| 
-| Close 1/2 | The course time of the second curtain between the bottom left sensor and the central sensor. Unit: ms|
-| Close 2/2 | The course time of the second curtain between the central sensor and the top right sensor. Unit: ms|  
+| Open 1/2 | The travel time of the first curtain between the bottom left sensor and the central sensor. Unit: ms|
+| Open 2/2 | The travel time of the first curtain between the central sensor and the top right sensor. Unit: ms| 
+| Close 1/2 | The travel time of the second curtain between the bottom left sensor and the central sensor. Unit: ms|
+| Close 2/2 | The travel time of the second curtain between the central sensor and the top right sensor. Unit: ms|  
 
 ## Further developments
 
