@@ -63,4 +63,4 @@ Here is the installation instructions for Windows platform. Steps are similar on
 
 ## Further developments
 
-If you want to make further developments or modifications on this tool, or even rewrite your own, you'll find [here](interface_specification.md) the interface specification of the tool.
+If you want to make further developments or modifications on this tool, or even rewrite your own, you'll find [here](../../wiki/Interface-Specifications) the interface specification of the tool.
