@@ -7,8 +7,8 @@
 """
 __author__ = "Sebastien ROY"
 __license__ = "GPL"
-__version__ = "0.0.1"
-__status__ = "Development"
+__version__ = "1.0.1"
+__status__ = "Released"
 
 import threading
 import time
@@ -35,7 +35,9 @@ def testMeasureThread():
     index = 0
     currentId = 0
     entries = ['Tagada tsouin', 
-        '{\"eventType\": \"MultiSensorMeasure\", \"unit\": \"microsecond\", \"firmware_version\": \"1.0.0\", \"bottomLeftOpen\": 0, \"bottomLeftClose\": 987, \"centerOpen\": 3456, \"centerClose\": 4567, \"topRightOpen\": 5678, \"topRightClose\": 6789}', 
+        '{\"eventType\": \"MultiSensorMeasure\", \"unit\": \"microsecond\", \"firmware_version\": \"1.0.0\",\
+            \"bottomLeftOpen\": 0, \"bottomLeftClose\": 987, \"centerOpen\": 3456, \"centerClose\": 4567, \"topRightOpen\": 5678, \"topRightClose\": 6789,\
+            \"bottomLeftOpenOffset\":-25, \"bottomLeftCloseOffset\":32, \"topRightOpenOffset\":40, \"topRightCloseOffset\":10 }',
         'pof pof', 
          ''] 
     while not is_stopped:
@@ -71,7 +73,7 @@ def measureThread():
                 elif(app.serialPort.is_open): 
                     app.connectionStatusLabel.set("Connected") 
                 else:
-                    app.connectionStatusLabel.set("Disonnected")
+                    app.connectionStatusLabel.set("Disconnected")
 
             if(app.serialPort != None and app.serialPort.is_open):
                 try:
@@ -130,6 +132,7 @@ def microSpeed(val1, val2, offset1=0, offset2=0):
         Computes speed in 1/s from microseconds 
         a data < 0 mean no value
     '''
+    print("Offset1 = {}, Offset2 = {}\n", offset1, offset2)
     if(((val1+offset1) == (val2+offset2)) or (val1 < 0) or (val2 < 0)):
         return "-"
     else:
@@ -176,33 +179,25 @@ class RemoteApp:
         self.selectedDirection = StringVar()
         self.extrapolation_factor = 24.0 / 20.0 # extrapolation from 20mm to 24mm (vertical direction)
 
-        # This is the columns definition : column and data id, column name, column width, value format, value computation function that use json data
+        # This is the columns definition : column and data id (internal identification of the culmn, must be unique), column name, column width, value format, value computation function that use json data
+        # You can freely change the order, or even remove you the column of your choice.
+        # To remove a column, you can either remove the related line or change it as a comment, by adding a '#' character at the beginning of the line
         self.dataDefs = [
             DataDef('id', 'Id', 20, '{}', lambda data: data['id']),
             DataDef('speed_c', 'Speed (1/s)', 60, '{:0.1f}', lambda data: microSpeed(data['centerClose'], data['centerOpen'])),
             DataDef('time_c', 'Time (ms)', 60, '{:0.3f}', lambda data: microTime(data['centerClose'], data['centerOpen'])),
-            DataDef('course_1', 'Open (ms)', 60, '{:0.2f}', lambda data: microTime(data['topRightOpen'], data['bottomLeftOpen'], 
-                                                                                   data['topRightOpenOffset'], data['bottomLeftOpenOffset'])),
-            DataDef('course_2', 'Close (ms)', 60, '{:0.2f}', lambda data: microTime(data['topRightClose'], data['bottomLeftClose'],
-                                                                                    data['topRightCloseOffset'], data['bottomLeftCloseOffset'])),
+            DataDef('course_1', 'Open (ms)', 60, '{:0.2f}', lambda data: microTime(data['topRightOpen'], data['bottomLeftOpen'], data['topRightOpenOffset'], data['bottomLeftOpenOffset'])),
+            DataDef('course_2', 'Close (ms)', 60, '{:0.2f}', lambda data: microTime(data['topRightClose'], data['bottomLeftClose'], data['topRightCloseOffset'], data['bottomLeftCloseOffset'])),
             DataDef('course_1_ext', 'Open ext', 60, '{:0.2f}', lambda data: extrapolate(data['course_1'])),
             DataDef('course_2_ext', 'Close ext', 60, '{:0.2f}', lambda data: extrapolate(data['course_2'])),
-            DataDef('speed_bl', 'Speed Bot. L.', 70, '{:0.1f}', lambda data: microSpeed(data['bottomLeftClose'], data['bottomLeftOpen'],
-                                                                                        data['bottomLeftCloseOffset'], data['bottomLeftOpenOffset'])),
-            DataDef('time_bl', 'Time Bot. L.', 70, '{:0.3f}', lambda data: microTime(data['bottomLeftClose'], data['bottomLeftOpen'],
-                                                                                     data['bottomLeftClose'], data['bottomLeftOpen'])),
-            DataDef('speed_tr', 'Speed Top R.', 70, '{:0.1f}', lambda data: microSpeed(data['topRightClose'], data['topRightOpen'],
-                                                                                       data['topRightCloseOffset'], data['topRightOpen'])),
-            DataDef('time_tr', 'Time Top R.', 70, '{:0.3f}', lambda data: microTime(data['topRightClose'], data['topRightOpen'],
-                                                                                    data['topRightCloseOffset'], data['topRightOpenOffset'])),
-            DataDef('course_1_12', 'Open 1/2', 60, '{:0.2f}', lambda data: microTime(data['centerOpen'], data['bottomLeftOpen'],
-                                                                                     0, data['bottomLeftOpenOffset'])),
-            DataDef('course_1_22', 'Open 2/2', 60, '{:0.2f}', lambda data: microTime(data['centerOpen'], data['topRightOpen'],
-                                                                                     9, data['topRightOpenOffset'])),
-            DataDef('course_2_12', 'Close 1/2', 60, '{:0.2f}', lambda data: microTime(data['centerClose'], data['bottomLeftClose'],
-                                                                                      0, data['bottomLeftCloseOffset'])),
-            DataDef('course_2_22', 'Close 2/2', 60, '{:0.2f}', lambda data: microTime(data['centerClose'], data['topRightClose'],
-                                                                                      0, data['topRightCloseOffset']))
+            DataDef('speed_bl', 'Speed Bot. L.', 70, '{:0.1f}', lambda data: microSpeed(data['bottomLeftClose'], data['bottomLeftOpen'], data['bottomLeftCloseOffset'], data['bottomLeftOpenOffset'])),
+            DataDef('time_bl', 'Time Bot. L.', 70, '{:0.3f}', lambda data: microTime(data['bottomLeftClose'], data['bottomLeftOpen'], data['bottomLeftCloseOffset'], data['bottomLeftOpenOffset'])),
+            DataDef('speed_tr', 'Speed Top R.', 70, '{:0.1f}', lambda data: microSpeed(data['topRightClose'], data['topRightOpen'], data['topRightCloseOffset'], data['topRightOpenOffset'])),
+            DataDef('time_tr', 'Time Top R.', 70, '{:0.3f}', lambda data: microTime(data['topRightClose'], data['topRightOpen'], data['topRightCloseOffset'], data['topRightOpenOffset'])),
+            DataDef('course_1_12', 'Open 1/2', 60, '{:0.2f}', lambda data: microTime(data['centerOpen'], data['bottomLeftOpen'], 0, data['bottomLeftOpenOffset'])),
+            DataDef('course_1_22', 'Open 2/2', 60, '{:0.2f}', lambda data: microTime(data['centerOpen'], data['topRightOpen'], 0, data['topRightOpenOffset'])),
+            DataDef('course_2_12', 'Close 1/2', 60, '{:0.2f}', lambda data: microTime(data['centerClose'], data['bottomLeftClose'], 0, data['bottomLeftCloseOffset'])),
+            DataDef('course_2_22', 'Close 2/2', 60, '{:0.2f}', lambda data: microTime(data['centerClose'], data['topRightClose'], 0, data['topRightCloseOffset']))
             ]
 
     def openSerialPort(self, name):
