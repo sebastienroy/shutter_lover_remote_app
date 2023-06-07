@@ -38,6 +38,18 @@ def testMeasureThread():
         '{\"eventType\": \"MultiSensorMeasure\", \"unit\": \"microsecond\", \"firmware_version\": \"1.0.0\",\
             \"bottomLeftOpen\": 0, \"bottomLeftClose\": 987, \"centerOpen\": 3456, \"centerClose\": 4567, \"topRightOpen\": 5678, \"topRightClose\": 6789,\
             \"bottomLeftOpenOffset\":-25, \"bottomLeftCloseOffset\":32, \"topRightOpenOffset\":40, \"topRightCloseOffset\":10 }',
+        '{\"eventType\": \"MultiSensorMeasure\", \"unit\": \"microsecond\", \"firmware_version\": \"1.0.0\",\
+            \"bottomLeftOpen\": 0, \"bottomLeftClose\": 987, \"centerOpen\": 3456, \"centerClose\": 4567, \"topRightOpen\": -1, \"topRightClose\": -1,\
+            \"bottomLeftOpenOffset\":-25, \"bottomLeftCloseOffset\":32, \"topRightOpenOffset\":40, \"topRightCloseOffset\":10 }',
+        '{\"eventType\": \"MultiSensorMeasure\", \"unit\": \"microsecond\", \"firmware_version\": \"1.0.0\",\
+            \"bottomLeftOpen\": -1, \"bottomLeftClose\": -1, \"centerOpen\": 0, \"centerClose\": 987, \"topRightOpen\": 3456, \"topRightClose\": 4567,\
+            \"bottomLeftOpenOffset\":-25, \"bottomLeftCloseOffset\":32, \"topRightOpenOffset\":40, \"topRightCloseOffset\":10 }',
+        '{\"eventType\": \"MultiSensorMeasure\", \"unit\": \"microsecond\", \"firmware_version\": \"1.0.0\",\
+            \"bottomLeftOpen\": 0, \"bottomLeftClose\": 987, \"centerOpen\": -1, \"centerClose\": -1, \"topRightOpen\": 5678, \"topRightClose\": 6789,\
+            \"bottomLeftOpenOffset\":-25, \"bottomLeftCloseOffset\":32, \"topRightOpenOffset\":40, \"topRightCloseOffset\":10 }',
+        '{\"eventType\": \"MultiSensorMeasure\", \"unit\": \"microsecond\", \"firmware_version\": \"1.0.0\",\
+            \"bottomLeftOpen\": 0, \"bottomLeftClose\": 987, \"centerOpen\": 3456, \"centerClose\": 4567, \"topRightOpen\": 5678, \"topRightClose\": -1,\
+            \"bottomLeftOpenOffset\":-25, \"bottomLeftCloseOffset\":32, \"topRightOpenOffset\":40, \"topRightCloseOffset\":10 }',
         'pof pof', 
          ''] 
     while not is_stopped:
@@ -132,7 +144,7 @@ def microSpeed(val1, val2, offset1=0, offset2=0):
         Computes speed in 1/s from microseconds 
         a data < 0 mean no value
     '''
-    print("Offset1 = {}, Offset2 = {}\n", offset1, offset2)
+    print("Offset1 = {}, Offset2 = {}\n".format(offset1, offset2))
     if(((val1+offset1) == (val2+offset2)) or (val1 < 0) or (val2 < 0)):
         return "-"
     else:
@@ -164,9 +176,10 @@ class RemoteApp:
         This is the application class
     '''
 
-    def __init__(self):        
+    def __init__(self, test=False):  
+        self.test = test      
         self.ws = Tk()
-        self.comque= queue.Queue()
+        self.comque = queue.Queue()
         self.document = []
         self.measureId = 0
         self.serialPort = None
@@ -175,15 +188,17 @@ class RemoteApp:
         self.is_stopped = False
         self.selectedPort = StringVar()
         self.connectionStatusLabel = None
-        self.combo = None
+        self.connectionCombo = None
         self.selectedDirection = StringVar()
         self.extrapolation_factor = 24.0 / 20.0 # extrapolation from 20mm to 24mm (vertical direction)
+        self.speedSetting = StringVar(value='1/60')
 
         # This is the columns definition : column and data id (internal identification of the culmn, must be unique), column name, column width, value format, value computation function that use json data
         # You can freely change the order, or even remove you the column of your choice.
         # To remove a column, you can either remove the related line or change it as a comment, by adding a '#' character at the beginning of the line
         self.dataDefs = [
             DataDef('id', 'Id', 20, '{}', lambda data: data['id']),
+            DataDef('setting','Setting', 60, '{}', lambda data: app.speedSetting.get()),
             DataDef('speed_c', 'Speed (1/s)', 60, '{:0.1f}', lambda data: microSpeed(data['centerClose'], data['centerOpen'])),
             DataDef('time_c', 'Time (ms)', 60, '{:0.3f}', lambda data: microTime(data['centerClose'], data['centerOpen'])),
             DataDef('course_1', 'Open (ms)', 60, '{:0.2f}', lambda data: microTime(data['topRightOpen'], data['bottomLeftOpen'], data['topRightOpenOffset'], data['bottomLeftOpenOffset'])),
@@ -240,6 +255,8 @@ class RemoteApp:
         # iterate on all dataDef definitions, get the value that is stored with the defined id and get it as string
         rowValues = [(dataDef.strValue(data[dataDef.id])) for dataDef in self.dataDefs]
         item = tree.insert(parent='', index='end', iid=data['id'],text='', values=rowValues)
+        tree.see(item)
+
 
     def dataEvent(self, event):
         """ Dispatches the events received from the listener """
@@ -315,7 +332,7 @@ class RemoteApp:
         self.openSerialPort(self.portName)  
 
     def update_cb_list(self):
-        self.combo['values'] = self.listSerialPorts()
+        self.connectionCombo['values'] = self.listSerialPorts()
 
     def on_direction_selection(self, event):
         if(self.selectedDirection.get() == "Vertical"):
@@ -337,8 +354,8 @@ class RemoteApp:
         v_scroll = Scrollbar(frame, name = "v_scroll")
         
         # Button_frame is necessary to put many buttons in a row
-        button_frame = Frame(frame, name="buttonFrame")
-        button_frame.pack(expand=True, fill='both')
+        button_frame = Frame(frame, name="buttonFrame", )
+        button_frame.pack(expand=True, fill='x')
 
         Button(button_frame, text="Clear all", command=self.clearAll).grid(row=0, column=0, padx=5, pady=5)
         Button(button_frame, text="Copy to Clipboard", command=self.copyToClipboard).grid(row=0, column=1, padx=5, pady=5)
@@ -347,13 +364,13 @@ class RemoteApp:
         ttk.Separator(master=button_frame, orient=VERTICAL, style='TSeparator', class_= ttk.Separator,takefocus= 0).grid(row=0, column=2, padx=5, pady=0)
         Label(button_frame, text="Device :").grid(row=0, column=3, padx=5, pady=5)
         # serial ports combo
-        self.combo = ttk.Combobox(button_frame, textvariable = self.selectedPort, state='readonly', width=8,  postcommand = self.update_cb_list)
+        self.connectionCombo = ttk.Combobox(button_frame, textvariable = self.selectedPort, state='readonly', width=8,  postcommand = self.update_cb_list)
         self.ports=self.listSerialPorts()
         self.portName = self.ports[0]
-        self.combo['values']=self.ports
-        self.combo.current(0)
-        self.combo.bind("<<ComboboxSelected>>", self.on_combo_selection)
-        self.combo.grid(row=0, column=4, padx=5, pady=5)
+        self.connectionCombo['values']=self.ports
+        self.connectionCombo.current(0)
+        self.connectionCombo.bind("<<comboboxSelected>>", self.on_combo_selection)
+        self.connectionCombo.grid(row=0, column=4, padx=5, pady=5)
         
         # serial port status
         self.connectionStatusLabel = StringVar(frame, "Unknown Status")
@@ -361,15 +378,23 @@ class RemoteApp:
 
         # curtain translation direction combo
         ttk.Separator(master=button_frame, orient=VERTICAL, style='TSeparator', class_= ttk.Separator,takefocus= 0).grid(row=0, column=6, padx=5, pady=0)
-        Label(button_frame, text="Curtain translation direction :").grid(row=0, column=7, padx=7, pady=5)
+        Label(button_frame, text="Curtain translation direction:").grid(row=0, column=7, padx=7, pady=5)
         directionCombo = ttk.Combobox(button_frame, values=['Vertical', 'Horizontal'], textvariable = self.selectedDirection, state='readonly', width=8,  postcommand = self.update_cb_list)
         directionCombo.current(0)
         directionCombo.bind("<<ComboboxSelected>>", self.on_direction_selection)
         directionCombo.grid(row=0, column=8, padx=5, pady=5)
 
+        # Camera speed setting
+        ttk.Separator(master=button_frame, orient=VERTICAL, style='TSeparator', class_= ttk.Separator,takefocus= 0).grid(row=0, column=9, padx=5, pady=0)
+        Label(button_frame, text="Speed setting:").grid(row=0, column=10, padx=7, pady=5)
+        speedCombo = ttk.Combobox(button_frame, textvariable = self.speedSetting, state='readwrite', width=8,  postcommand = self.update_cb_list)
+        speedCombo['values']= ['1', '1/2', '1/4', '1/8', '1/15', '1/30', '1/60', '1/125', '1/250', '1/500', '1/1000', '1/2000', '1/4000']
+        speedCombo.grid(row=0, column=11, padx=5, pady=5)
+
         tree = ttk.Treeview(frame, name = "measureTable")
         tree.config(yscrollcommand=v_scroll.set)
         v_scroll.pack(side=RIGHT, fill=Y)
+
         
         tree['columns'] = [(dataDef.id) for dataDef in self.dataDefs]
 
@@ -388,12 +413,18 @@ class RemoteApp:
         self.ws.bind('<<Measure>>', self.dataEvent)
 
         # TEST : change the thread to start in order to generate test data
-        #Thr=threading.Thread(target=testMeasureThread)
-        Thr=threading.Thread(target=measureThread)
+        if(self.test):
+            Thr=threading.Thread(target=testMeasureThread)
+        else:
+            Thr=threading.Thread(target=measureThread)
         Thr.start()
 
         self.ws.mainloop()
 
-if __name__ == "__main__":   
-    app = RemoteApp()
+if __name__ == "__main__":  
+
+    test = len(sys.argv)>1 and (sys.argv[1] == 'test')
+    print("test={}".format(test))
+
+    app = RemoteApp(test=test)
     app.run()
