@@ -14,8 +14,12 @@ Here is the installation instructions for Windows platform. Steps are similar on
 1. Install Python packages:  
    See <https://www.python.org/downloads/>  
    
-   On the installer panel, click on "Customize installation"  
+   On the installer panel:  
    ![Python installation panel](pictures/PythonInstall.png)  
+
+   - **select the checkbox "Add python.exe to PATH"**
+   - click on "Customize installation"  
+   
    
    Then check that at least the following options are selected:  
    - pip  
