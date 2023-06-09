@@ -7,7 +7,7 @@
 """
 __author__ = "Sebastien ROY"
 __license__ = "GPL"
-__version__ = "1.0.1"
+__version__ = "1.1.0"
 __status__ = "Released"
 
 import threading
@@ -26,6 +26,10 @@ from dataclasses import dataclass
 is_stopped = False
 DEBUG = True
 app = None
+
+# we define that the speed setting is in col 1 (the 2nd column)
+SPEED_SETTING_COL = 1
+SPEED_SETTING_ID = 'setting'
 
 def testMeasureThread():
     """ Test purpose:
@@ -64,7 +68,7 @@ def testMeasureThread():
                 print("Not JSon : " + entries[index])
         except TclError:
             break  
-        time.sleep(1)
+        time.sleep(2)
         index += 1
         if (index>= len(entries)):
             index = 0
@@ -115,6 +119,7 @@ def measureThread():
     finally:
         if(DEBUG):
             print("Measurement worker ended")
+
 @dataclass
 class DataDef:
     """
@@ -170,6 +175,55 @@ def extrapolate(val):
     else:
         return val
 
+class TreeviewEdit(ttk.Treeview):
+    ''' This is a redefinition of the TreeView widget in order to make it editable 
+        Thank you to JobinPy on YouTube for his tutorial
+    '''
+    def __init__(self, master, **kw):
+        super().__init__(master, **kw)       
+        self.bind("<Double-Button-1>", self.on_double_click)
+        self.root = master
+        
+    def on_double_click(self, event):
+        region_clicked = self.identify_region(event.x, event.y)
+        if (region_clicked != 'cell'):
+            return
+        column = self.identify_column(event.x)
+        column_index = int(column[1:])
+        if(column_index != (SPEED_SETTING_COL + 1)):
+            return
+        selected_iid = self.focus()
+        selected_values = self.item(selected_iid)
+        selected_text = selected_values.get("values")[SPEED_SETTING_COL]
+        column_box = self.bbox(selected_iid, column)
+        entry_edit = ttk.Entry(self, width=column_box[2])
+        # Record col index and item iid
+        entry_edit.editing_column_index = column_index
+        entry_edit.editing_item_iid = selected_iid
+        
+        entry_edit.insert(0, selected_text)
+        entry_edit.select_range(0, len(str(selected_text)))
+        entry_edit.focus()
+        
+        entry_edit.bind("<Escape>", self.on_escape)
+        entry_edit.bind("<FocusOut>", self.update_cell)
+        entry_edit.bind("<Return>", self.update_cell)
+        
+        entry_edit.place(x=column_box[0], y=column_box[1], w=column_box[2], h=column_box[3])
+        
+    def on_escape(self, event):
+        event.widget.destroy()
+         
+    def update_cell(self, event):
+        new_text = event.widget.get()
+        selected_iid = event.widget.editing_item_iid
+        column_index = event.widget.editing_column_index
+        current_values = self.item(selected_iid).get("values")
+        current_values[column_index-1] = new_text
+        app.document[int(selected_iid)][SPEED_SETTING_ID] = new_text
+        self.item(selected_iid, values=current_values)
+        event.widget.destroy()
+        
 
 class RemoteApp:
     '''
@@ -191,14 +245,14 @@ class RemoteApp:
         self.connectionCombo = None
         self.selectedDirection = StringVar()
         self.extrapolation_factor = 24.0 / 20.0 # extrapolation from 20mm to 24mm (vertical direction)
-        self.speedSetting = StringVar(value='1/60')
+        self.speedSetting = StringVar(value='60')
 
         # This is the columns definition : column and data id (internal identification of the culmn, must be unique), column name, column width, value format, value computation function that use json data
         # You can freely change the order, or even remove you the column of your choice.
         # To remove a column, you can either remove the related line or change it as a comment, by adding a '#' character at the beginning of the line
         self.dataDefs = [
             DataDef('id', 'Id', 20, '{}', lambda data: data['id']),
-            DataDef('setting','Setting', 60, '{}', lambda data: app.speedSetting.get()),
+            DataDef(SPEED_SETTING_ID,'Setting (1/s)', 70, '{:0.1f}', lambda data: app.speedSetting.get()),
             DataDef('speed_c', 'Speed (1/s)', 60, '{:0.1f}', lambda data: microSpeed(data['centerClose'], data['centerOpen'])),
             DataDef('time_c', 'Time (ms)', 60, '{:0.3f}', lambda data: microTime(data['centerClose'], data['centerOpen'])),
             DataDef('course_1', 'Open (ms)', 60, '{:0.2f}', lambda data: microTime(data['topRightOpen'], data['bottomLeftOpen'], data['topRightOpenOffset'], data['bottomLeftOpenOffset'])),
@@ -355,7 +409,6 @@ class RemoteApp:
         
         # Button_frame is necessary to put many buttons in a row
         button_frame = Frame(frame, name="buttonFrame", )
-        button_frame.pack(expand=True, fill='x')
 
         Button(button_frame, text="Clear all", command=self.clearAll).grid(row=0, column=0, padx=5, pady=5)
         Button(button_frame, text="Copy to Clipboard", command=self.copyToClipboard).grid(row=0, column=1, padx=5, pady=5)
@@ -386,12 +439,15 @@ class RemoteApp:
 
         # Camera speed setting
         ttk.Separator(master=button_frame, orient=VERTICAL, style='TSeparator', class_= ttk.Separator,takefocus= 0).grid(row=0, column=9, padx=5, pady=0)
-        Label(button_frame, text="Speed setting:").grid(row=0, column=10, padx=7, pady=5)
+        Label(button_frame, text="Camera Speed setting (1/s):").grid(row=0, column=10, padx=7, pady=5)
         speedCombo = ttk.Combobox(button_frame, textvariable = self.speedSetting, state='readwrite', width=8,  postcommand = self.update_cb_list)
-        speedCombo['values']= ['1', '1/2', '1/4', '1/8', '1/15', '1/30', '1/60', '1/125', '1/250', '1/500', '1/1000', '1/2000', '1/4000']
+        speedCombo['values']= ['1', '2', '4', '8', '15', '30', '60', '125', '250', '500', '1000', '2000', '4000']
         speedCombo.grid(row=0, column=11, padx=5, pady=5)
 
-        tree = ttk.Treeview(frame, name = "measureTable")
+        button_frame.pack(expand=False, fill='x')
+        
+        # Tree (table) definition
+        tree = TreeviewEdit(frame, name = "measureTable")
         tree.config(yscrollcommand=v_scroll.set)
         v_scroll.pack(side=RIGHT, fill=Y)
 
