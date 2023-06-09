@@ -69,6 +69,7 @@ Here is the installation instructions for Windows platform. Steps are similar on
 | Column Name | Description |
 | :--: |:-- |
 | Id | The row number. Reset to 0 when clearing the table. |
+| Setting (1/s) | In this column is reported the current value of the Camera Speed setting combo box. It is used as a reference to compare with the measured value. This value is editable by double-click on the cell. |
 | Speed (1/s) | The shutter opening speed measured on the central sensor. This is the inverse of the open time. Unit : 1/s |
 | Time (ms) | The shutter open time measured on the central sensor. Unit : ms |
 | Open (ms) | The travel time of the first curtain (opening curtain) of the shutter, measured between the sensors located on the corners of the frame. Unit : ms |
