@@ -32,7 +32,10 @@ Here is the installation instructions for Windows platform. Steps are similar on
    Then click on "Next" then "Install".  
    After installation, reboot your computer.  
 
-2. Install PySerial package:  
+   **Note for OSX users** : the installation of the python "pip" package is mandatory for the next step. On OSX, the installation of the "pip" package can be done following the above instructions :  
+   https://www.groovypost.com/howto/install-pip-on-a-mac/ 
+
+3. Install PySerial package:  
    - On Windows Search Tool, type "cmd" and click on the Command Prompt application.  
    - Into the command prompt, execute the following line :  
 
@@ -40,12 +43,12 @@ Here is the installation instructions for Windows platform. Steps are similar on
    pip install pyserial
    ```
 
-3. Download the file shutter_lover_remote_app.py :  
+4. Download the file shutter_lover_remote_app.py :  
    Get the application from the following link:  
    <https://github.com/sebastienroy/shutter_lover_remote_app/releases/download/v1.1.0/shutter_lover_remote_app.py>  
   Save the file somewhere on your computer  
 
-4. Right-click on the downloaded file and select "Open With", then select Python.  
+5. Right-click on the downloaded file and select "Open With", then select Python.  
    You can choose to always use Python to open files having ".py" extension, so that you can execute the application through a double-click on the file.
 
 ## Usage
