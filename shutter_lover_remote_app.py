@@ -422,7 +422,7 @@ class RemoteApp:
         self.portName = self.ports[0]
         self.connectionCombo['values']=self.ports
         self.connectionCombo.current(0)
-        self.connectionCombo.bind("<<comboboxSelected>>", self.on_combo_selection)
+        self.connectionCombo.bind("<<ComboboxSelected>>", self.on_combo_selection)
         self.connectionCombo.grid(row=0, column=4, padx=5, pady=5)
         
         # serial port status
