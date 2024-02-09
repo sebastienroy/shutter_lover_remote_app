@@ -45,7 +45,7 @@ Here is the installation instructions for Windows platform. Steps are similar on
 
 4. Download the file shutter_lover_remote_app.py :  
    Get the application from the following link:  
-   <https://github.com/sebastienroy/shutter_lover_remote_app/releases/download/v1.1.0/shutter_lover_remote_app.py>  
+   <https://github.com/sebastienroy/shutter_lover_remote_app/releases/download/v1.1.1/shutter_lover_remote_app.py>  
   Save the file somewhere on your computer  
 
 5. Right-click on the downloaded file and select "Open With", then select Python.  
