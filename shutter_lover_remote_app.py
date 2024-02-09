@@ -93,15 +93,18 @@ def measureThread():
 
             if(app.serialPort != None and app.serialPort.is_open):
                 try:
-                    line = app.serialPort.readline()
-                    if(DEBUG):
-                        print(line)
-                    data = json.loads(line)
-                    # Put a data in the queue
-                    app.comque.put(data)
-                    # Generate an event in order to notify the GUI
-                    print("Processed data event : " + str(data))
-                    app.ws.event_generate('<<Measure>>', when='tail')       
+                    if(app.serialPort.in_waiting > 0):
+                        line = app.serialPort.readline()
+                        if(DEBUG):
+                            print(line)
+                        data = json.loads(line)
+                        # Put a data in the queue
+                        app.comque.put(data)
+                        # Generate an event in order to notify the GUI
+                        print("Processed data event : " + str(data))
+                        app.ws.event_generate('<<Measure>>', when='tail')
+                    else:
+                        time.sleep(0.1)       
                 except JSONDecodeError:
                     if(DEBUG):
                         print("Not formated data:" + str(line))
@@ -422,7 +425,7 @@ class RemoteApp:
         self.portName = self.ports[0]
         self.connectionCombo['values']=self.ports
         self.connectionCombo.current(0)
-        self.connectionCombo.bind("<<comboboxSelected>>", self.on_combo_selection)
+        self.connectionCombo.bind("<<ComboboxSelected>>", self.on_combo_selection)
         self.connectionCombo.grid(row=0, column=4, padx=5, pady=5)
         
         # serial port status
