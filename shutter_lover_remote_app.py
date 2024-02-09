@@ -7,7 +7,7 @@
 """
 __author__ = "Sebastien ROY"
 __license__ = "GPL"
-__version__ = "1.1.0"
+__version__ = "1.1.1"
 __status__ = "Released"
 
 import threading
